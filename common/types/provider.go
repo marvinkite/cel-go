@@ -334,7 +334,7 @@ func (p *Registry) RegisterType(types ...ref.Type) error {
 //
 // This method should be the inverse of ref.Val.ConvertToNative.
 func (p *Registry) NativeToValue(value any) ref.Val {
-	if val, found := nativeToValue(p, value); found {
+	if val, found := NativeTypeAdapter(p, value); found {
 		return val
 	}
 	switch v := value.(type) {
@@ -411,11 +411,14 @@ type defaultTypeAdapter struct{}
 var (
 	// DefaultTypeAdapter adapts canonical CEL types from their equivalent Go values.
 	DefaultTypeAdapter = &defaultTypeAdapter{}
+	// NativeTypeAdapter returns the converted (ref.Val, true) of a conversion is found,
+	// otherwise (nil, false)
+	NativeTypeAdapter = nativeToValue
 )
 
 // NativeToValue implements the ref.TypeAdapter interface.
 func (a *defaultTypeAdapter) NativeToValue(value any) ref.Val {
-	if val, found := nativeToValue(a, value); found {
+	if val, found := NativeTypeAdapter(a, value); found {
 		return val
 	}
 	return UnsupportedRefValConversionErr(value)
